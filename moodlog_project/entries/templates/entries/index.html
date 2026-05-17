@@ -1,0 +1,41 @@
+{% extends "entries/base.html" %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-black text-gray-800">{{ user.username|title }}'s Diary</h1>
+    <a href="{% url 'emotion-add' %}" class="btn btn-secondary text-white">+ Add New</a>
+</div>
+
+<div class="grid grid-cols-7 gap-2 mb-2 text-center font-bold text-gray-400 text-xs">
+    <div class="text-error">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div class="text-info">Sat</div>
+</div>
+
+<div class="grid grid-cols-7 gap-2">
+    {% for week in calendar %}
+        {% for day in week %}
+            <div class="min-h-[110px] border rounded-2xl p-2 transition-all {% if day == 0 %}bg-gray-50 border-transparent{% else %}bg-white border-gray-100 shadow-sm hover:shadow-md{% endif %}">
+                {% if day != 0 %}
+                    <span class="text-xs font-bold {% if day == today.day %}text-primary bg-primary/10 px-2 py-1 rounded-full{% else %}text-gray-300{% endif %}">
+                        {{ day }}
+                    </span>
+                    {% with log=logs_dict|get_item:day %}
+                        {% if log %}
+                            <div class="flex flex-col items-center justify-center mt-1">
+                                <a href="{% url 'emotion-edit' log.pk %}" class="text-4xl hover:scale-125 transition-transform cursor-pointer">
+                                    {{ log.emotion_emoji }}
+                                </a>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter mt-1">
+                                    {{ log.emotion_label }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+
+<p class="text-center text-xs text-gray-400 mt-8">Click on an emoji to edit your entry!</p>
+{% endblock %}

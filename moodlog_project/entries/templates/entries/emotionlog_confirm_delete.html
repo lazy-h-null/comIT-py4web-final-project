@@ -1,0 +1,16 @@
+{% extends "entries/base.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto text-center py-10">
+    <div class="card bg-error bg-opacity-10 border border-error p-8">
+        <h1 class="text-2xl font-bold text-error mb-4">Are you sure?</h1>
+        <p class="mb-6">You are about to delete the record from<br><strong>{{ object.created_at }}</strong>/</p>
+
+        <form method="post" class="flex justify-center gap-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-error text-white">Yes, Delete it</button>
+            <a href="{% url 'index' %}" class="btn btn-ghost">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

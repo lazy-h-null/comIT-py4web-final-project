@@ -1,0 +1,43 @@
+{% extends "entries/base.html" %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-blod">My Emotion Statistics</h1>
+    <p class="text-gray-500">Total records: <strong>{{ total_count }}</strong></p>
+</div>
+
+<div class="space-y-8">
+    {% regroup monthly_stats by month as stats_by_month %}
+    
+    {% for month_group in stats_by_month %}
+        <section>
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <span class="badge badge-primary badge-lg">{{ month_group.grouper|date:"F Y" }}</span>
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for item in month_group.list %}
+                    <div class="stats shadow bg-base-100 border border-gray-100">
+                        <div class="stat">
+                            <div class="stat-figure text-5xl opacity-80">
+                                {{ item.emoji }}
+                            </div>
+                            <div class="stat-value text-primary">{{ item.total }}</div>
+                            <div class="stat-desc text-lg font-bold text-gray-600">
+                                {{ item.label }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        <div class="divider"></div>
+    {% empty %}
+        <div class="alert alert-info">No statistics available yet.</div>
+    {% endfor %}
+</div>
+
+<div classs="mt-8">
+    <a href="{% url 'index' %}" class="btn btn-ghost">Back to Home</a>
+</div>
+{% endblock %}
