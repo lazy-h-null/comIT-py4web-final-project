@@ -1,11 +1,11 @@
 {% extends "entries/base.html" %}
 
-{% block theme %}aqua{% endblock %}
+{% block theme %}valentine{% endblock %}
 
 {% block content %}
 <div class="mb-8">
-    <h1 class="text-3xl font-blod">My Emotion Statistics</h1>
-    <p class="text-gray-500">Total records: <strong>{{ total_count }}</strong></p>
+    <h1 class="!text-2xl font-blod text-center">My Emotion Statistics</h1>
+    <p class="text-gray-500 text-end">Total records: <strong>{{ total_count }}</strong></p>
 </div>
 
 <div class="space-y-8">
@@ -19,7 +19,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% for item in month_group.list %}
-                    <div class="stats shadow bg-base-100 border border-gray-100">
+                    <div class="stats shadow bg-base-100 border">
                         <div class="stat">
                             <div class="stat-figure text-5xl opacity-80">
                                 {{ item.emoji }}
