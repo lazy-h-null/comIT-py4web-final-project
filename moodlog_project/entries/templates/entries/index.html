@@ -4,6 +4,14 @@
 {% block content %}
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-black text-gray-800">{{ user.username|title }}'s Diary</h1>
+
+    <div class="join border bg-white shadow-sm">
+        <a href="{% url 'index_month' prev_year prev_month %}" class="btn btn-sm join-item border-none hover:bg-gray-100">↞</a>
+        <button class="btn btn-sm join-item border-none no-animation bg-white pointer-events-none">
+            {{ view_date|date:"F Y" }}
+        </button>
+        <a href="{% url 'index_month' next_year next_month %}" class="btn btn-sm join-item border-none hover:bg-gray-100">↠</a>
+    </div>
     <a href="{% url 'emotion-add' %}" class="btn btn-secondary text-white">+ Add New</a>
 </div>
 
@@ -14,28 +22,81 @@
 <div class="grid grid-cols-7 gap-2">
     {% for week in calendar %}
         {% for day in week %}
-            <div class="min-h-[110px] border rounded-2xl p-2 transition-all {% if day == 0 %}bg-gray-50 border-transparent{% else %}bg-white border-gray-100 shadow-sm hover:shadow-md{% endif %}">
+            {% with log=logs_dict|get_item:day %}
+
+            <div class="min-h-[110px] border rounded-2xl p-2 transition-all {% if day == 0 %}bg-gray-50 border-transparent {% elif log and log.note %}bg-rose-100 border-rose-50 shadow-inner {% else %}bg-white border-gray-100 shadow-sm hover:shadow-md {% endif %}">
                 {% if day != 0 %}
                     <span class="text-xs font-bold {% if day == today.day %}text-primary bg-primary/10 px-2 py-1 rounded-full{% else %}text-gray-300{% endif %}">
                         {{ day }}
                     </span>
-                    {% with log=logs_dict|get_item:day %}
-                        {% if log %}
-                            <div class="flex flex-col items-center justify-center mt-1">
-                                <a href="{% url 'emotion-edit' log.pk %}" class="text-4xl hover:scale-125 transition-transform cursor-pointer">
-                                    {{ log.emotion_emoji }}
-                                </a>
-                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter mt-1">
-                                    {{ log.emotion_label }}
-                                </span>
+
+                    {% if log %}
+                        <div class="flex flex-col items-center justify-center mt-1">
+                            <div onclick="openMoodModal('{{ day }}', '{{ log.emotion_emoji }}', '{{ log.emotion_label }}', '{{ log.note|escapejs }}', '{% url 'emotion-edit' log.pk %}', '{% url 'emotion-delete' log.pk %}')" class="text-4xl hover:scale-125 transition-transform cursor-pointer">
+                                {{ log.emotion_emoji }}
                             </div>
-                        {% endif %}
-                    {% endwith %}
+
+                            <span class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter mt-1">
+                                {{ log.emotion_label }}
+                            </span>
+
+                            {% if log.note %}
+                                <div class="w-1 h-1 bg-rose-600 rounded-full mt-1"></div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
+            {% endwith %}
         {% endfor %}
     {% endfor %}
 </div>
 
 <p class="text-center text-xs text-gray-400 mt-8">Click on an emoji to edit your entry!</p>
+
+<dialog id="mood_modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box bg-base-100 border border-base-300">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 id="modal_date" class="font-black text-2xl text-primary">Date</h3>
+                <div id="modal_label" class="badge badge-ghost mt-1 uppercase text-[10px] font-bold">Emotion</div>
+            </div>
+            <div id="modal_emoji" class="text-6xl"></div>
+        </div>
+
+        <div class="py-6">
+            <p class="text-sm font-bold text-gray-400 mb-2 uppercase">My Note</p>
+            <div id="modal_note" class="bg-base-200 p-5 rounded-2xl text-base-content italic min-h-[100px] whitespace-pre-wrap">
+                No note for this day.
+            </div>
+        </div>
+
+        <div class="modal-action flex justify-between items-center">
+            <form method="dialog">
+                <button class="btn btn-ghost btn-sm">Close</button>
+            </form>
+            <div class="flex gap-2">
+                <a id="modal_edit_btn" href="#" class="btn btn-primary btn-sm text-white font-bold">Edit</a>
+                <a id="modal_delete_btn" href="#" class="btn btn-error btn-sm text-white font-bold">Delete</a>
+            </div>
+        </div>
+    </div>
+</dialog>
+
+
+<script>
+    function openMoodModal(day, emoji, label, note, editUrl, deleteUrl) {
+        const monthYear = "{{ view_date|date:'F Y'}}";
+        document.getElementById('modal_date').innerText = `${monthYear} ${day}`;
+        document.getElementById('modal_emoji').innerText = emoji;
+        document.getElementById('modal_label').innerText = label;
+        document.getElementById('modal_note').innerText = note ? note : "No story recorded for this day...";
+        document.getElementById('modal_edit_btn').href = editUrl;
+        document.getElementById('modal_delete_btn').href = deleteUrl;
+
+        mood_modal.showModal();
+    }
+</script>
+
+
 {% endblock %}

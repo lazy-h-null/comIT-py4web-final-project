@@ -3,4 +3,5 @@ from .views import SighUpView
 
 urlpatterns = [
     path('signup/', SighUpView.as_view(), name='signup'),
+    
 ]
