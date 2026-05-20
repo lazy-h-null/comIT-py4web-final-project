@@ -1,18 +1,25 @@
 {% extends "entries/base.html" %}
 {% load custom_filters %}
+{% block theme %}cupcake{% endblock %}
 
 {% block content %}
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-black text-gray-800">{{ user.username|title }}'s Diary</h1>
-
-    <div class="join border bg-white shadow-sm">
-        <a href="{% url 'index_month' prev_year prev_month %}" class="btn btn-sm join-item border-none hover:bg-gray-100">↞</a>
-        <button class="btn btn-sm join-item border-none no-animation bg-white pointer-events-none">
-            {{ view_date|date:"F Y" }}
-        </button>
-        <a href="{% url 'index_month' next_year next_month %}" class="btn btn-sm join-item border-none hover:bg-gray-100">↠</a>
+<div class="flex justify-between items-center mb-10">
+    <h1 class="font-black flex items-center gap-2">
+        <span class="text-2xl">📓</span>
+        <span class="text-2xl text-neutral tracking-tight">
+            {{ user.username|title }}'s Diary
+        </span>
+    </h1>
+    <div class="flex items-center gap-4">
+        <div class="join border-2 border-base-300 bg-base-100 shadow-sm">
+            <a href="{% url 'index_month' prev_year prev_month %}" class="btn btn-sm join-item border-none hover:bg-base-200">↞</a>
+            <button class="btn btn-sm join-item border-none no-animation bg-base-100 pointer-events-none">
+                {{ view_date|date:"F Y" }}
+            </button>
+            <a href="{% url 'index_month' next_year next_month %}" class="btn btn-sm join-item border-none hover:bg-base-200">↠</a>
+        </div>
+        <a href="{% url 'emotion-add' %}" class="btn btn-secondary text-white shadow-md">+ Add New</a>
     </div>
-    <a href="{% url 'emotion-add' %}" class="btn btn-secondary text-white">+ Add New</a>
 </div>
 
 <div class="grid grid-cols-7 gap-2 mb-2 text-center font-bold text-gray-400 text-xs">
@@ -24,9 +31,17 @@
         {% for day in week %}
             {% with log=logs_dict|get_item:day %}
 
-            <div class="min-h-[110px] border rounded-2xl p-2 transition-all {% if day == 0 %}bg-gray-50 border-transparent {% elif log and log.note %}bg-rose-100 border-rose-50 shadow-inner {% else %}bg-white border-gray-100 shadow-sm hover:shadow-md {% endif %}">
+            <div style="border: 2px solid {% if log and log.note %}#ef9fbc8D{% elif day == 0 %}transparent{% else %}transparent{% endif %} !important;" class="min-h-[110px] rounded-2xl p-2 transition-all>
+                {% if day == 0 %}
+                    bg-gray-200 opacity-50
+                {% elif log and log.note %}
+                    bg-secondary/40 shadow-inner 
+                {% else %}
+                    bg-accent/10 shadow-sm hover:shadow-md
+                {% endif %}">
+
                 {% if day != 0 %}
-                    <span class="text-xs font-bold {% if day == today.day %}text-primary bg-primary/10 px-2 py-1 rounded-full{% else %}text-gray-300{% endif %}">
+                    <span class="text-xs font-bold {% if day == today.day %}text-primary bg-primary/10 px-2 py-1 rounded-full{% else %}text-gray-400{% endif %}">
                         {{ day }}
                     </span>
 
