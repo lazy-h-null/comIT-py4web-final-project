@@ -18,7 +18,31 @@
                     </label>
 
                     <div class="mood-input-wrapper">
-                        {{ field }}
+                        {% if field.name == 'emotion' %}
+                            <div class="flex flex-wrap justify-between gap-2 mt-2">
+                                <button type="button" data-value="HAPPY" class="mood-btn bg-amber-50 text-amber-700 border-amber-200">
+                                    <span class="text-3xl mb-1">😁</span>
+                                    <span class="text-[10px] uppercase font-bold">Happy</span>
+                                <button type="button" data-value="CALM" class="mood-btn bg-emerald-50 text-emerald-700 border-emerald-200">
+                                    <span class="text-3xl mb-1">☺️</span>
+                                    <span class="text-[10px] uppercase font-bold">Calm</span>
+                                <button type="button" data-value="LONELY" class="mood-btn bg-purple-50 text-purple-700 border-purple-200">
+                                    <span class="text-3xl mb-1">😔</span>
+                                    <span class="text-[10px] uppercase font-bold">Lonely</span>
+                                <button type="button" data-value="SAD" class="mood-btn bg-blue-50 text-blue-700 border-blue-200">
+                                    <span class="text-3xl mb-1">😭</span>
+                                    <span class="text-[10px] uppercase font-bold">Sad</span>
+                                <button type="button" data-value="ANGRY" class="mood-btn bg-rose-50 text-rose-700 border-rose-200">
+                                    <span class="text-3xl mb-1">🤬</span>
+                                    <span class="text-[10px] uppercase font-bold">Angry</span>
+                                </button>
+                            </div>
+                            <div class="hidden">
+                                {{ field }}
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
                     </div>
 
                     {% if field.help_text %}
@@ -44,6 +68,30 @@
 </div>
 
 <style>
+    .mood-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 65px;
+        height: 75px;
+        border-radius: 1rem;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .mood-btn:hover {
+        transform: translateY(-3px);
+        filter: brightness(0.95);
+    }
+
+    .mood-btn.active {
+        border-color: currentColor;
+        transform: scale(1.05);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
     select, input[type="text"] {
         width: 100% !important;
         height: 3rem !important;
@@ -61,10 +109,30 @@
         background-color: #f9fafb !important;
         min-height: 120px !important;
     }
+
     select:focus, input:focus, textarea:focus {
         outline: 2px solid var(--p) !important;
         outline-offset: 2px !important;
         background-color: white !important;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.mood-btn');
+        const hiddenSelect = document.querySelector('select[name="emotion"]');
+        if (hiddenSelect.value) {
+            const activeBtn = document.querySelector('.mood-btn[data-value="${hiddenSelect.value}"]');
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                buttons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                hiddenSelect.value = this.dataset.value;
+            });
+        });
+    });
+</script>
 {% endblock %}

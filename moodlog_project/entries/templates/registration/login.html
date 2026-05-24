@@ -4,26 +4,32 @@
 
 {% block content %}
 <div class="max-w-md mx-auto card bg-base-100 shadow-xl border p-8">
-    <h2 class="text-2xl font-bold mb-6 text-center">Login to MoodLog</h2>
+    <h2 class="text-2xl font-bold mb-6 text-center">🌱 Start your Diary today</h2>
     
-    <form method="post" class="space-y-4">
+    <form method="post" class="form-container space-y-4 mb-12">
         {% csrf_token %}
-        <div class="form-control">
-            {{ form.as_p }}
-        </div>
-        <button type="submit" class="btn btn-primary w-full text-white mt-4">Login</button>
+        {{ form.as_p }}
+        
+        <button type="submit" class="btn btn-primary w-full text-white mt-4">Open my MoodLog</button>
     </form>
 
-    <p class="mt-6 text-center text-sm">
-        Don't have an account?<a href="{% url 'signup' %}" class="link link-primary">Register here</a>
+    <p class="mt-6 text-center text-sm mb-8">
+        📝 Ready to write your first MoodLog?
     </p>
+    <a href="{% url 'signup' %}" class="link link-primary text-md font-bold flex items-center justify-center gap-1">Enter the MoodLog world 🌎</a>
 </div>
 
 <style>
+    .form-container p {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1.25rem;
+    }
+
     .form-container input {
         width: 100%;
         padding: 10px;
-        border: 1px soild #ccc;
+        border: 1px solid #ccc;
         border-radius: 8px;
         margin-top: 5px;
         margin-bottom: 15px;
@@ -33,6 +39,8 @@
     .form-container label {
         font-weight: bold;
         font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: oklch(var(--bc));
     }
 </style>
 {% endblock %}

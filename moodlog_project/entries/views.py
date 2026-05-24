@@ -1,9 +1,9 @@
-from django.db.models import Count
+from django.db.models import Count, Case, When, Value, IntegerField
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.urls import reverse_lazy
 from .models import EmotionLog
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, ExtractMonth
 import calendar
 from datetime import datetime
 from django.utils import timezone
@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import update_session_auth_hash
 from django.views.generic.edit import FormView
+import json
 
 # Create your views here.
 
@@ -99,12 +100,24 @@ class EmotionStatsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user_logs = EmotionLog.objects.filter(user=self.request.user)
+        today = timezone.now()
 
         stats = (
             user_logs.annotate(month=TruncMonth('created_at'))
             .values('month', 'emotion')
             .annotate(total=Count('id'))
-            .order_by('-month', 'emotion')
+            .annotate(
+                emotion_order=Case(
+                    When(emotion='HAPPY', then=Value(1)),
+                    When(emotion='CALM', then=Value(2)),
+                    When(emotion='LONELY', then=Value(3)),
+                    When(emotion='SAD', then=Value(4)),
+                    When(emotion='ANGRY', then=Value(5)),
+                    default=Value(6),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by('-month', 'emotion_order')
         )
 
         choices = dict(EmotionLog.EMOTION_CHOICES)
@@ -112,14 +125,44 @@ class EmotionStatsView(LoginRequiredMixin, TemplateView):
         for item in stats:
             full_display = str(choices.get(item['emotion'], "? Unknown"))
             item['display'] = full_display
-            item['emoji'] = full_display[0] if len(full_display) > 0 else ""
-            item['label'] = full_display[2:] if len(full_display) > 2 else ""
+            parts = full_display.split(' ', 1)
+            item['emoji'] = parts[0] if len(parts) > 0 else ""
+            item['label'] = parts[1] if len(parts) > 1 else ""
 
         
         context['monthly_stats'] = stats
         context['total_count'] = user_logs.count()
-        return context
+        
     
+        yearly_logs = EmotionLog.objects.filter(
+            user=self.request.user,
+            created_at__year=today.year
+        ).annotate(month=ExtractMonth('created_at'))
+
+        score_map = {
+            'happy': 5,
+            'calm': 4,
+            'lonely': 3,
+            'sad': 2,
+            'angry': 1
+        }
+
+        monthly_scores = [0] * 12
+        monthly_counts = [0] * 12
+        
+        for log in yearly_logs:
+            month_idx = log.month - 1
+            score = score_map.get(log.emotion.lower(), 0)
+            monthly_scores[month_idx] += score
+            monthly_counts[month_idx] += 1
+
+        chart_labels = [f"{m} ({count})" for m, count in zip(range(1,13), monthly_counts)]
+
+        context['chart_labels'] = json.dumps(chart_labels)
+        context['chart_scores'] = json.dumps(monthly_scores)
+
+        return context
+
 
 class CustomPasswordChangeView(LoginRequiredMixin, FormView):
     form_class = SetPasswordForm

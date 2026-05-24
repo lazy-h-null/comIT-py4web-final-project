@@ -1,12 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 # Create your models here.
 
 class EmotionLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     EMOTION_CHOICES = [
         ('HAPPY', '😁 Happy'),
-        ('CALM', '😌 Calm'),
+        ('CALM', '☺️ Calm'),
         ('LONELY', '😔 Lonely'),
         ('SAD', '😭 Sad'),
         ('ANGRY', '🤬 Angry'),
@@ -27,15 +28,17 @@ class EmotionLog(models.Model):
 
     note = models.TextField(blank=True, null=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.user.username}'s mood on {self.created_at.strftime('%Y-%m-%d')}"
+        local_date = timezone.localtime(self.created_at).strftime('%Y-%m-%d')
+        return f"{self.user.username}'s mood on {local_date}"
 
     @property
     def emotion_emoji(self):
-        return self.get_emotion_display()[0]
+        return self.get_emotion_display().split(' ')[0]
     
     @property
     def emotion_label(self):
-        return self.get_emotion_display()[2:]
+        parts = self.get_emotion_display().split(' ', 1)
+        return parts[1] if len(parts) > 1 else ""
