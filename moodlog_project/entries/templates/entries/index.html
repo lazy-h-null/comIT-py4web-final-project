@@ -12,11 +12,15 @@
     </h1>
     <div class="flex items-center gap-4">
         <div class="join border-2 border-base-300 bg-base-100 shadow-sm">
-            <a href="{% url 'index_month' prev_year prev_month %}" class="btn btn-sm join-item border-none hover:bg-base-200">↞</a>
-            <button class="btn btn-sm join-item border-none no-animation bg-base-100 pointer-events-none">
-                {{ view_date|date:"F Y" }}
+            <a href="{% url 'index_month' prev_year prev_month %}" class="btn btn-sm join-item border-none hover:bg-base-200">❮</a>
+            <button class="btn btn-sm join-item border-none no-animation bg-base-100 pointer-events-none w-28 flex justify-center">
+                {{ view_date|date:"M Y" }}
             </button>
-            <a href="{% url 'index_month' next_year next_month %}" class="btn btn-sm join-item border-none hover:bg-base-200">↠</a>
+            {% if is_latest %}
+                <div class="btn btn-sm join-item border-none opacity-20 cursor-not-allowed">❯</div>
+            {% else %}
+                <a href="{% url 'index_month' next_year next_month %}" class="btn btn-sm join-item border-none hover:bg-base-200">❯</a>
+            {% endif %}
         </div>
         <a href="{% url 'emotion-add' %}" class="btn btn-secondary text-white shadow-md">+ Add New</a>
     </div>
@@ -32,7 +36,7 @@
             {% with log=logs_dict|get_item:day %}
 
             <div style="border: 2px solid {% if log and log.note %}#ef9fbc8D{% elif day == 0 %}transparent{% else %}transparent{% endif %} !important;" 
-                class="min-h-[110px] rounded-2xl p-2 transition-all>
+                class="min-h-[110px] rounded-2xl p-2 transition-all
                 {% if day == 0 %}
                     bg-gray-200 opacity-30
                 {% elif log and log.note %}

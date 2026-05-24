@@ -25,8 +25,8 @@ class EmotionListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         
         today = timezone.localtime(timezone.now())   
-        year = self.kwargs.get('year', today.year)
-        month = self.kwargs.get('month', today.month)
+        year = int(self.kwargs.get('year', today.year))
+        month = int(self.kwargs.get('month', today.month))
 
         if month == 1:
             prev_year, prev_month = year - 1, 12
@@ -48,14 +48,20 @@ class EmotionListView(LoginRequiredMixin, ListView):
         )
         logs_dict = {timezone.localtime(log.created_at).day: log for log in user_logs}
 
+        is_latest = (year > today.year) or (year == today.year and month >= today.month)
+
         context.update({
             'calendar': month_days,
             'logs_dict': logs_dict,
             'now': today,
             'view_date': datetime(year, month, 1),
-            'prev_year': prev_year, 'prev_month': prev_month,
-            'next_year': next_year, 'next_month': next_month,
+            'prev_year': prev_year,
+            'next_year': next_year,
+            'prev_month': prev_month,
+            'next_month': next_month,
+            'is_latest': is_latest,
         })
+
         return context
 
 
@@ -100,10 +106,35 @@ class EmotionStatsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user_logs = EmotionLog.objects.filter(user=self.request.user)
-        today = timezone.now()
+        
+        global_latest = user_logs.order_by('-created_at').first()
+        if global_latest:
+            latest_year = global_latest.created_at.year
+            latest_month = global_latest.created_at.month
+        else:
+            latest_year = timezone.now().year
+            latest_month = timezone.now().month
+
+        years_in_db = sorted(list(set(user_logs.dates('created_at', 'year'))), key=lambda x: x.year)
+        years_list = [dt.year for dt in years_in_db]
+        view_year = self.kwargs.get('year')
+        
+        if not view_year:
+            view_year = latest_year
+
+        prev_year = next_year = None
+        if view_year in years_list:
+            idx = years_list.index(view_year)
+            if idx > 0: prev_year = years_list[idx -1]
+            if idx < len(years_list) - 1: next_year = years_list[idx + 1]
+
+        latest_month_in_year = user_logs.filter(created_at__year=view_year).order_by('-created_at').first()
+        view_month = latest_month_in_year.created_at.month if latest_month_in_year else 12
+        
 
         stats = (
-            user_logs.annotate(month=TruncMonth('created_at'))
+            user_logs.filter(created_at__year=latest_year, created_at__month=latest_month)
+            .annotate(month=TruncMonth('created_at'))
             .values('month', 'emotion')
             .annotate(total=Count('id'))
             .annotate(
@@ -117,7 +148,7 @@ class EmotionStatsView(LoginRequiredMixin, TemplateView):
                     output_field=IntegerField(),
                 )
             )
-            .order_by('-month', 'emotion_order')
+            .order_by('emotion_order')
         )
 
         choices = dict(EmotionLog.EMOTION_CHOICES)
@@ -132,12 +163,9 @@ class EmotionStatsView(LoginRequiredMixin, TemplateView):
         
         context['monthly_stats'] = stats
         context['total_count'] = user_logs.count()
+        context['current_view_month'] = f"{view_year}.{view_month}"
         
-    
-        yearly_logs = EmotionLog.objects.filter(
-            user=self.request.user,
-            created_at__year=today.year
-        ).annotate(month=ExtractMonth('created_at'))
+        yearly_logs = user_logs.filter(created_at__year=view_year).annotate(month=ExtractMonth('created_at'))
 
         score_map = {
             'happy': 5,
@@ -156,10 +184,20 @@ class EmotionStatsView(LoginRequiredMixin, TemplateView):
             monthly_scores[month_idx] += score
             monthly_counts[month_idx] += 1
 
-        chart_labels = [f"{m} ({count})" for m, count in zip(range(1,13), monthly_counts)]
+        chart_labels = [
+            [calendar.month_name[m][:3].upper(), f"({count})"]
+            for m, count in zip(range(1,13), monthly_counts)
+        ]
 
-        context['chart_labels'] = json.dumps(chart_labels)
-        context['chart_scores'] = json.dumps(monthly_scores)
+        context.update({
+            'monthly_stats': stats,
+            'total_count': user_logs.count(),
+            'chart_labels': json.dumps(chart_labels),
+            'chart_scores': json.dumps(monthly_scores),
+            'view_year': view_year,
+            'prev_year': prev_year,
+            'next_year': next_year,
+        })
 
         return context
 
