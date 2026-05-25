@@ -91,13 +91,24 @@ class EmotionUpdateView(LoginRequiredMixin, UpdateView):
     model = EmotionLog
     template_name = 'entries/emotionlog_form.html'
     fields = ['emotion', 'category', 'custom_category', 'note']
-    success_url = reverse_lazy('index')
-
+    #success_url = reverse_lazy('index')
+    def get_success_url(self):
+        local_date = timezone.localtime(self.object.created_at)
+        year = local_date.year
+        month = local_date.month
+        from django.urls import reverse
+        return reverse('index_month', kwargs={'year': year, 'month': month})
 
 class EmotionDeleteView(LoginRequiredMixin, DeleteView):
     model = EmotionLog
     template_name = 'entries/emotionlog_confirm_delete.html'
-    success_url = reverse_lazy('index')
+    #success_url = reverse_lazy('index')
+    def get_success_url(self):
+        local_date = timezone.localtime(self.object.created_at)
+        year = local_date.year
+        month = local_date.month
+        from django.urls import reverse
+        return reverse('index_month', kwargs={'year': year, 'month': month})
 
 
 class EmotionStatsView(LoginRequiredMixin, TemplateView):
