@@ -9,6 +9,34 @@
 - **Manage Entries (Update/Delete):** Modify or remove previous logs.
 - **Monthly Statistics:** View summaries of emotional trends and data.
 
+## 📂 MoodLog Project Structure
+
+```text
+moodlog_project/                # Root Project Folder
+├── manage.py                   # Project Manager
+├── db.sqlite3                  # Database
+├── config/                     # Project Settings
+│   ├── settings.py
+│   └── urls.py
+├── accounts/                   # App: Signup
+│   ├── models.py
+│   ├── views.py
+│   └── templates/
+├── entries/                    # App: Mood Logs & Stats
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── templatetags/
+│   └── templates/
+│       └── entries/        
+│       │   ├── index.html      # Main feed
+│       │   └── stats.html      # Stats & Annual Chart
+│       └── registration/       # Login
+│           └── login.html
+├── requirements.txt
+└── venv
+```
+
 ## 🛠️ Tech Stack
 - **Backend:** Python, Django
 - **Database:** SQLite(Development)
@@ -16,4 +44,5 @@
 
 ## 📅 Timeline
 - **Presentation Date:** May 27, 2026
-- **Developer:** Yoori Han
+- **Developer:** lazy-h-null
+
