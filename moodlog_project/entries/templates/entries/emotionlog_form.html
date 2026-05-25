@@ -23,15 +23,19 @@
                                 <button type="button" data-value="HAPPY" class="mood-btn bg-amber-50 text-amber-700 border-amber-200">
                                     <span class="text-3xl mb-1">😁</span>
                                     <span class="text-[10px] uppercase font-bold">Happy</span>
+                                </button>
                                 <button type="button" data-value="CALM" class="mood-btn bg-emerald-50 text-emerald-700 border-emerald-200">
                                     <span class="text-3xl mb-1">☺️</span>
                                     <span class="text-[10px] uppercase font-bold">Calm</span>
+                                </button>
                                 <button type="button" data-value="LONELY" class="mood-btn bg-purple-50 text-purple-700 border-purple-200">
                                     <span class="text-3xl mb-1">😔</span>
                                     <span class="text-[10px] uppercase font-bold">Lonely</span>
+                                </button>
                                 <button type="button" data-value="SAD" class="mood-btn bg-blue-50 text-blue-700 border-blue-200">
                                     <span class="text-3xl mb-1">😭</span>
                                     <span class="text-[10px] uppercase font-bold">Sad</span>
+                                </button>
                                 <button type="button" data-value="ANGRY" class="mood-btn bg-rose-50 text-rose-700 border-rose-200">
                                     <span class="text-3xl mb-1">🤬</span>
                                     <span class="text-[10px] uppercase font-bold">Angry</span>
@@ -53,7 +57,7 @@
                 </div>
             {% endfor %}
 
-            <div class="pt-4">
+            <div class="pt-4 flex gap-2">
                 <button type="submit" class="btn btn-primary flex-1 text-white">Save Record</button>
                 {% if object %}
                     <a href="{% url 'emotion-delete' object.pk %}" class="btn btn-error btn-outline">Delete</a>
@@ -90,6 +94,7 @@
         border-color: currentColor;
         transform: scale(1.05);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background-color: white;
     }
 
     select, input[type="text"] {
@@ -121,8 +126,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.mood-btn');
         const hiddenSelect = document.querySelector('select[name="emotion"]');
-        if (hiddenSelect.value) {
-            const activeBtn = document.querySelector('.mood-btn[data-value="${hiddenSelect.value}"]');
+        if (hiddenSelect && hiddenSelect.value) {
+            const val = hiddenSelect.value;
+            const activeBtn = document.querySelector('.mood-btn[data-value="${val}"]');
             if (activeBtn) activeBtn.classList.add('active');
         }
 

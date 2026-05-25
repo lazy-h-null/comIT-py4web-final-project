@@ -13,6 +13,7 @@ class EmotionLog(models.Model):
         ('ANGRY', '🤬 Angry'),
     ]
     emotion = models.CharField(max_length=10, choices=EMOTION_CHOICES)
+    mood_score = models.IntegerChoices(default=3)
 
     CATEGORY_CHOICES = [
         ('SELF', 'Self'),
