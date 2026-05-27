@@ -46,3 +46,7 @@ moodlog_project/                # Root Project Folder
 - **Presentation Date:** May 27, 2026
 - **Developer:** lazy-h-null
 
+## Screenshots
+![login](final-1.png)
+![main](final-2.png)
+![stats](final-3.png)
